@@ -3,15 +3,13 @@ import { useState } from 'react'
 import reactSvg from '/assets/react.svg'
 import viteRubySvg from '/assets/vite_ruby.svg'
 
-import cs from './InertiaExample.module.css'
+import cs from './Example.module.css'
 
-export default function InertiaExample({ name }) {
+export default function ExamplePage({ name }) {
   const [count, setCount] = useState(0)
 
   return (
     <>
-      <Head title="Inertia + Vite Ruby + React Example" />
-
       <div className={cs.root}>
         <h1 className={cs.h1}>Hello {name}!</h1>
 
@@ -32,7 +30,7 @@ export default function InertiaExample({ name }) {
           </a>
         </div>
 
-        <h2 className={cs.h2}>Inertia + Vite Ruby + React</h2>
+        <h2 className={cs.h2}>Vite Ruby + React</h2>
 
         <div className="card">
           <button
@@ -42,12 +40,12 @@ export default function InertiaExample({ name }) {
             count is {count}
           </button>
           <p>
-            Edit <code>app/frontend/pages/InertiaExample.jsx</code> and save to
+            Edit <code>app/frontend/pages/Example.jsx</code> and save to
             test HMR
           </p>
         </div>
         <p className={cs.readTheDocs}>
-          Click on the Inertia, Vite Ruby, and React logos to learn more
+          Click on the Vite Ruby, and React logos to learn more
         </p>
       </div>
     </>
