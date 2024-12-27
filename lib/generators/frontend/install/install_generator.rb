@@ -21,7 +21,7 @@ module Frontend
                                enum: FRAMEWORKS.keys,
                                default: nil
 
-      class_option :typescript, type: :boolean, default: false,
+      class_option :typescript, type: :boolean, default: true,
                                 desc: "Whether to use TypeScript"
 
       class_option :package_manager, type: :string, default: nil,
@@ -31,10 +31,12 @@ module Frontend
       class_option :interactive, type: :boolean, default: true,
                                  desc: "Whether to prompt for optional installations"
 
-      class_option :tailwind, type: :boolean, default: false,
+      class_option :tailwind, type: :boolean, default: true,
                               desc: "Whether to install Tailwind CSS"
-      class_option :vite, type: :boolean, default: false,
+
+      class_option :vite, type: :boolean, default: true,
                           desc: "Whether to install Vite Ruby"
+
       class_option :example_page, type: :boolean, default: true,
                                   desc: "Whether to add an example page"
 
@@ -70,6 +72,27 @@ module Frontend
         end
       end
 
+      def update_layout_file
+        unless application_layout.exist?
+          say_error "Could not find the application layout file. Please add the following tags manually:", :red
+          # say_error "+  <%= vite_react_refresh_tag %>" if react?
+          say_error "+  <%= #{vite_tag} \"#{main_entrypoint}\" %>"
+          return
+        end
+
+        say "Adding #{main_entrypoint} script tag to the application layout"
+        headers = <<-ERB
+    <%= #{vite_tag} "#{main_entrypoint}" %>
+        ERB
+        insert_into_file application_layout.to_s, headers, after: "<%= vite_client_tag %>\n"
+
+        # if react? && !application_layout.read.include?("vite_react_refresh_tag")
+        #   say "Adding Vite React Refresh tag to the application layout"
+        #   insert_into_file application_layout.to_s, "<%= vite_react_refresh_tag %>\n    ",
+        #                    before: "<%= vite_client_tag %>"
+        # end
+      end
+
       def install_framework
         say "Installing npm packages for #{framework}"
 
@@ -79,23 +102,7 @@ module Frontend
         say "Copying #{main_entrypoint} entrypoint"
         template "#{framework}/#{main_entrypoint}", js_file_path("entrypoints/#{main_entrypoint}")
 
-        if application_layout.exist?
-          say "Adding #{main_entrypoint} script tag to the application layout"
-          headers = <<-ERB
-    <%= #{vite_tag} "main" %>
-          ERB
-          insert_into_file application_layout.to_s, headers, after: "<%= vite_client_tag %>\n"
-
-          if react? && !application_layout.read.include?("vite_react_refresh_tag")
-            say "Adding Vite React Refresh tag to the application layout"
-            insert_into_file application_layout.to_s, "<%= vite_react_refresh_tag %>\n    ",
-                             before: "<%= vite_client_tag %>"
-          end
-        else
-          say_error "Could not find the application layout file. Please add the following tags manually:", :red
-          say_error "+  <%= vite_react_refresh_tag %>" if react?
-          say_error "+  <%= #{vite_tag} \"main\" %>"
-        end
+        update_layout_file
       end
 
       def install_typescript
@@ -226,7 +233,7 @@ module Frontend
       end
 
       def main_entrypoint
-        "main.#{typescript? ? 'ts' : 'js'}"
+        "main.#{typescript? ? 'tsx' : 'jsx'}"
       end
 
       def vite_tag
